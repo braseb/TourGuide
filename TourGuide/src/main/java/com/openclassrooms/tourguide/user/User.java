@@ -15,8 +15,8 @@ public class User {
 	private String phoneNumber;
 	private String emailAddress;
 	private Date latestLocationTimestamp;
-	private List<VisitedLocation> visitedLocations = new CopyOnWriteArrayList<>();
-	private List<UserReward> userRewards = new CopyOnWriteArrayList<>();
+	private List<VisitedLocation> visitedLocations = new ArrayList<>();
+	private List<UserReward> userRewards = new ArrayList<>();
 	private UserPreferences userPreferences = new UserPreferences();
 	private List<Provider> tripDeals = new ArrayList<>();
 	public User(UUID userId, String userName, String phoneNumber, String emailAddress) {
@@ -58,19 +58,19 @@ public class User {
 		return latestLocationTimestamp;
 	}
 	
-	public void addToVisitedLocations(VisitedLocation visitedLocation) {
+	public synchronized void addToVisitedLocations(VisitedLocation visitedLocation) {
 		visitedLocations.add(visitedLocation);
 	}
 	
 	public List<VisitedLocation> getVisitedLocations() {
-		return visitedLocations;
+		return new ArrayList<VisitedLocation>(visitedLocations) ;
 	}
 	
 	public void clearVisitedLocations() {
 		visitedLocations.clear();
 	}
 	
-	public void addUserReward(UserReward userReward) {
+	public synchronized void addUserReward(UserReward userReward) {
 		/*if(userRewards.stream().filter(r -> !r.attraction.attractionName.equals(userReward.attraction)).count() == 0) {
 			userRewards.add(userReward);
 		}*/
@@ -79,8 +79,8 @@ public class User {
 	    }
 	}
 	
-	public List<UserReward> getUserRewards() {
-		return userRewards;
+	public  List<UserReward> getUserRewards() {
+		return new ArrayList<UserReward>(userRewards) ;
 	}
 	
 	public UserPreferences getUserPreferences() {
