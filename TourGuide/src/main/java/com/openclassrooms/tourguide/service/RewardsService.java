@@ -1,5 +1,6 @@
 package com.openclassrooms.tourguide.service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -40,15 +41,25 @@ public class RewardsService {
 		List<VisitedLocation> userLocations = user.getVisitedLocations();
 		List<Attraction> attractions = gpsUtil.getAttractions();
 		
+		List<UserReward> UserRewardToAdd = new ArrayList<UserReward>();
+		
 		for(VisitedLocation visitedLocation : userLocations) {
-			for(Attraction attraction : attractions) {
+			
+		    for(Attraction attraction : attractions) {
 				if(user.getUserRewards().stream().filter(r -> r.attraction.attractionName.equals(attraction.attractionName)).count() == 0) {
 					if(nearAttraction(visitedLocation, attraction)) {
-						user.addUserReward(new UserReward(visitedLocation, attraction, getRewardPoints(attraction, user)));
+						UserRewardToAdd.add(new UserReward(visitedLocation, attraction, getRewardPoints(attraction, user)));
+					    //user.addUserReward(new UserReward(visitedLocation, attraction, getRewardPoints(attraction, user)));
 					}
 				}
-			}
+				
+                
+            }
 		}
+		//append the userReward now
+        for (UserReward ur : UserRewardToAdd) {
+            user.addUserReward(ur);
+        } 
 	}
 	
 	public boolean isWithinAttractionProximity(Attraction attraction, Location location) {
