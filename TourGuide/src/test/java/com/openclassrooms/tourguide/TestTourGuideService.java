@@ -1,5 +1,6 @@
 package com.openclassrooms.tourguide;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -92,7 +93,6 @@ public class TestTourGuideService {
 		assertEquals(user.getUserId(), visitedLocation.userId);
 	}
 
-	@Disabled // Not yet implemented
 	@Test
 	public void getNearbyAttractions() {
 		GpsUtil gpsUtil = new GpsUtil();
@@ -108,6 +108,9 @@ public class TestTourGuideService {
 		tourGuideService.tracker.stopTracking();
 
 		assertEquals(5, attractions.size());
+		List<Double> distances = attractions.stream()
+		                .map(a -> rewardsService.getDistance(a, visitedLocation.location)).toList();
+		assertThat(distances).isSorted();
 	}
 
 	public void getTripDeals() {

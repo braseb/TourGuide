@@ -8,6 +8,7 @@ import com.openclassrooms.tourguide.user.UserReward;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -97,15 +98,31 @@ public class TourGuideService {
 
 	public List<Attraction> getNearByAttractions(VisitedLocation visitedLocation) {
 		List<Attraction> nearbyAttractions = new ArrayList<>();
+		Double distanceMax = null;
+		
+		
 		for (Attraction attraction : gpsUtil.getAttractions()) {
-			if (rewardsService.isWithinAttractionProximity(attraction, visitedLocation.location)) {
-				nearbyAttractions.add(attraction);
-			}
+			double distance = rewardsService.getDistance(attraction, visitedLocation.location);
+		    
+		    if (nearbyAttractions.size() < 5 || distanceMax == null || distanceMax > distance) {
+		        if (nearbyAttractions.size() >= 5) {
+		            nearbyAttractions.remove(nearbyAttractions.size()-1);
+		        }
+		        
+		        nearbyAttractions.add(attraction);
+		        nearbyAttractions.sort(Comparator.comparingDouble(attract -> 
+		                                rewardsService.getDistance(attract, visitedLocation.location)));
+	        
+		        if (distanceMax == null || distance < distanceMax) {
+		            distanceMax = distance;
+		        }
+		        
+		    }
 		}
 
 		return nearbyAttractions;
 	}
-
+		
 	private void addShutDownHook() {
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 			public void run() {
