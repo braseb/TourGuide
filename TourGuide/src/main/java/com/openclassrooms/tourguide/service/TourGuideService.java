@@ -1,5 +1,6 @@
 package com.openclassrooms.tourguide.service;
 
+import com.openclassrooms.tourguide.entity.AttractionInfos;
 import com.openclassrooms.tourguide.helper.InternalTestHelper;
 import com.openclassrooms.tourguide.tracker.Tracker;
 import com.openclassrooms.tourguide.user.User;
@@ -97,30 +98,40 @@ public class TourGuideService {
 	}
 
 	public List<Attraction> getNearByAttractions(VisitedLocation visitedLocation) {
-		List<Attraction> nearbyAttractions = new ArrayList<>();
-		Double distanceMax = null;
-		
-		
-		for (Attraction attraction : gpsUtil.getAttractions()) {
-			double distance = rewardsService.getDistance(attraction, visitedLocation.location);
-		    
-		    if (nearbyAttractions.size() < 5 || distanceMax == null || distanceMax > distance) {
-		        if (nearbyAttractions.size() >= 5) {
-		            nearbyAttractions.remove(nearbyAttractions.size()-1);
-		        }
-		        
-		        nearbyAttractions.add(attraction);
-		        nearbyAttractions.sort(Comparator.comparingDouble(attract -> 
-		                                rewardsService.getDistance(attract, visitedLocation.location)));
-	        
-		        if (distanceMax == null || distance < distanceMax) {
-		            distanceMax = distance;
-		        }
-		        
-		    }
-		}
+		List<AttractionInfos> attractionsInfos = getNearByAttractionsWithInfos(visitedLocation);
+		List<Attraction> nearbyAttractions = attractionsInfos.stream().map(a -> a.getAttraction())
+		                                                                .toList();
 
 		return nearbyAttractions;
+	}
+	
+	public List<AttractionInfos> getNearByAttractionsWithInfos(VisitedLocation visitedLocation) {
+	    List<AttractionInfos> nearbyAttractionsInfo = new ArrayList<>();
+        Double distanceMax = null;
+                
+        for (Attraction attraction : gpsUtil.getAttractions()) {
+            double distance = rewardsService.getDistance(attraction, visitedLocation.location);
+                        
+            if (nearbyAttractionsInfo.size() < 5 || distanceMax == null || distanceMax > distance) {
+                if (nearbyAttractionsInfo.size() >= 5) {
+                    nearbyAttractionsInfo.remove(nearbyAttractionsInfo.size()-1);
+                }
+                int rewardPoints = rewardsService.getRewardPoints(attraction, visitedLocation.userId);
+                
+                
+                nearbyAttractionsInfo.add(new AttractionInfos(attraction, 
+                                                               distance, 
+                                                               rewardPoints));
+                nearbyAttractionsInfo.sort(Comparator.comparingDouble(a -> a.getDistance()));
+            
+                if (distanceMax == null || distanceMax > distance) {
+                    distanceMax = distance;
+                }
+                
+            }
+        }
+
+        return nearbyAttractionsInfo;
 	}
 		
 	private void addShutDownHook() {

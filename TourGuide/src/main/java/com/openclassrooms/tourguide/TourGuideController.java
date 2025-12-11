@@ -2,7 +2,6 @@ package com.openclassrooms.tourguide;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -10,13 +9,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import gpsUtil.location.Attraction;
 import gpsUtil.location.VisitedLocation;
 import rewardCentral.RewardCentral;
 
 import com.openclassrooms.tourguide.dto.AttractionDto;
 import com.openclassrooms.tourguide.dto.NearbyAttractionDto;
 import com.openclassrooms.tourguide.dto.UserLocalisationDto;
+import com.openclassrooms.tourguide.entity.AttractionInfos;
 import com.openclassrooms.tourguide.service.TourGuideService;
 import com.openclassrooms.tourguide.user.User;
 import com.openclassrooms.tourguide.user.UserReward;
@@ -56,18 +55,18 @@ public class TourGuideController {
     	
         User user =  getUser(userName);
         VisitedLocation visitedLocation = tourGuideService.getUserLocation(user);
-    	List<Attraction> attractions = tourGuideService.getNearByAttractions(visitedLocation);
+    	List<AttractionInfos> attractions = tourGuideService.getNearByAttractionsWithInfos(visitedLocation);
     	
     	List<AttractionDto> listAttractions = new ArrayList<AttractionDto>();
     	UserLocalisationDto userLocalisationDto = new UserLocalisationDto(visitedLocation.location.longitude, 
     	                                                                    visitedLocation.location.latitude);
     	
     	attractions.stream().forEach(a -> listAttractions.add(new AttractionDto(
-    	                                            a.attractionName, 
-                                                    a.longitude, 
-                                                    a.latitude, 
-                                                    a.latitude, 
-                                                    rewardCentral.getAttractionRewardPoints(a.attractionId, user.getUserId()))));
+    	                                            a.getAttraction().attractionName, 
+                                                    a.getAttraction().longitude, 
+                                                    a.getAttraction().latitude, 
+                                                    a.getDistance(), 
+                                                    a.getRewardPoints())));
     	    	
     	return ResponseEntity.ok(new NearbyAttractionDto(userLocalisationDto, listAttractions));
     	
