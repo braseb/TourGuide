@@ -3,6 +3,8 @@ package com.openclassrooms.tourguide.service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 
 import org.springframework.stereotype.Service;
 
@@ -38,29 +40,41 @@ public class RewardsService {
 		proximityBuffer = defaultProximityBuffer;
 	}
 	
-	public void calculateRewards(User user) {
-		List<VisitedLocation> userLocations = user.getVisitedLocations();
-		List<Attraction> attractions = gpsUtil.getAttractions();
+	public CompletableFuture<Void> calculateRewards(User user, Executor executor) {
 		
-		List<UserReward> UserRewardToAdd = new ArrayList<UserReward>();
-		
-		for(VisitedLocation visitedLocation : userLocations) {
-			
-		    for(Attraction attraction : attractions) {
-				if(user.getUserRewards().stream().filter(r -> r.attraction.attractionName.equals(attraction.attractionName)).count() == 0) {
-					if(nearAttraction(visitedLocation, attraction)) {
-						UserRewardToAdd.add(new UserReward(visitedLocation, attraction, getRewardPoints(attraction, user)));
-					    //user.addUserReward(new UserReward(visitedLocation, attraction, getRewardPoints(attraction, user)));
-					}
-				}
-				
-                
-            }
-		}
-		//append the userReward now
-        for (UserReward ur : UserRewardToAdd) {
-            user.addUserReward(ur);
-        } 
+	    Runnable task = (() -> {
+                	    List<VisitedLocation> userLocations = user.getVisitedLocations();
+                		List<Attraction> attractions = gpsUtil.getAttractions();
+                		
+                		List<UserReward> UserRewardToAdd = new ArrayList<UserReward>();
+                		
+                		for(VisitedLocation visitedLocation : userLocations) {
+                			
+                		    for(Attraction attraction : attractions) {
+                				if(user.getUserRewards().stream().filter(r -> r.attraction.attractionName.equals(attraction.attractionName)).count() == 0) {
+                					if(nearAttraction(visitedLocation, attraction)) {
+                						UserRewardToAdd.add(new UserReward(visitedLocation, attraction, getRewardPoints(attraction, user)));
+                					    //user.addUserReward(new UserReward(visitedLocation, attraction, getRewardPoints(attraction, user)));
+                					}
+                				}
+                				
+                                
+                            }
+                		}
+                		//append the userReward now
+                        for (UserReward ur : UserRewardToAdd) {
+                            user.addUserReward(ur);
+                        }
+	    });
+	    if (executor != null) {
+	       return CompletableFuture.runAsync(task, executor);
+	    }else {
+            return CompletableFuture.runAsync(task);
+        }
+	}
+	
+	public CompletableFuture<Void> calculateRewards(User user) {
+	    return calculateRewards(user, null);
 	}
 	
 	public boolean isWithinAttractionProximity(Attraction attraction, Location location) {

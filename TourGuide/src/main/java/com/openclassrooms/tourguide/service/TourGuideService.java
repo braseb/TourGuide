@@ -17,6 +17,10 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -61,9 +65,9 @@ public class TourGuideService {
 		return user.getUserRewards();
 	}
 
-	public VisitedLocation getUserLocation(User user) {
+	public VisitedLocation getUserLocation(User user) throws InterruptedException, ExecutionException {
 		VisitedLocation visitedLocation = (user.getVisitedLocations().size() > 0) ? user.getLastVisitedLocation()
-				: trackUserLocation(user);
+				: trackUserLocation(user).get();
 		return visitedLocation;
 	}
 
@@ -90,11 +94,36 @@ public class TourGuideService {
 		return providers;
 	}
 
-	public VisitedLocation trackUserLocation(User user) {
-		VisitedLocation visitedLocation = gpsUtil.getUserLocation(user.getUserId());
-		user.addToVisitedLocations(visitedLocation);
-		rewardsService.calculateRewards(user);
-		return visitedLocation;
+	public CompletableFuture<VisitedLocation>  trackUserLocation(User user, Executor executor) {
+	    
+	    Supplier<VisitedLocation> task = () -> gpsUtil.getUserLocation(user.getUserId());
+	    
+	    CompletableFuture<VisitedLocation> visitedLocationFuture = 
+	            (executor != null ? CompletableFuture.supplyAsync(task, executor)
+	                                : CompletableFuture.supplyAsync(task))
+	            .thenCompose(vl -> rewardsService.calculateRewards(user)
+	                    .thenApply(v -> {user.addToVisitedLocations(vl);
+	                                        return vl;
+	                                        }));
+	            
+	    
+	    /*CompletableFuture<VisitedLocation> visitedLocationFuture = 
+	            CompletableFuture.supplyAsync(() -> gpsUtil.getUserLocation(user.getUserId()))
+	            .thenCompose(vl -> rewardsService.calculateRewards(user)
+	            .thenApply(v -> {user.addToVisitedLocations(vl);
+                                    //rewardsService.calculateRewards(user).join();
+                                    return vl;
+                                    }));*/
+	    
+        
+	    //VisitedLocation visitedLocation = gpsUtil.getUserLocation(user.getUserId());
+		//user.addToVisitedLocations(visitedLocation);
+		//rewardsService.calculateRewards(user);
+		return visitedLocationFuture;
+	}
+	
+	public CompletableFuture<VisitedLocation>  trackUserLocation(User user){
+	    return trackUserLocation(user, null);
 	}
 
 	public List<Attraction> getNearByAttractions(VisitedLocation visitedLocation) {

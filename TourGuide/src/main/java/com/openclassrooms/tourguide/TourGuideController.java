@@ -2,6 +2,7 @@ package com.openclassrooms.tourguide;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -37,7 +38,7 @@ public class TourGuideController {
     }
     
     @RequestMapping("/getLocation") 
-    public VisitedLocation getLocation(@RequestParam String userName) {
+    public VisitedLocation getLocation(@RequestParam String userName) throws InterruptedException, ExecutionException {
     	return tourGuideService.getUserLocation(getUser(userName));
     }
     
@@ -51,12 +52,12 @@ public class TourGuideController {
         // The reward points for visiting each Attraction.
         //    Note: Attraction reward points can be gathered from RewardsCentral
     @RequestMapping("/getNearbyAttractions") 
-    public ResponseEntity<?> getNearbyAttractions(@RequestParam String userName) {
+    public ResponseEntity<?> getNearbyAttractions(@RequestParam String userName) throws InterruptedException, ExecutionException {
     	
         User user =  getUser(userName);
         VisitedLocation visitedLocation = tourGuideService.getUserLocation(user);
     	List<AttractionInfos> attractions = tourGuideService.getNearByAttractionsWithInfos(visitedLocation);
-    	
+    	    	
     	List<AttractionDto> listAttractions = new ArrayList<AttractionDto>();
     	UserLocalisationDto userLocalisationDto = new UserLocalisationDto(visitedLocation.location.longitude, 
     	                                                                    visitedLocation.location.latitude);
