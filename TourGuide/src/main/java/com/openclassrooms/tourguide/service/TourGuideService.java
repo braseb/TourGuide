@@ -101,10 +101,11 @@ public class TourGuideService {
 	    CompletableFuture<VisitedLocation> visitedLocationFuture = 
 	            (executor != null ? CompletableFuture.supplyAsync(task, executor)
 	                                : CompletableFuture.supplyAsync(task))
-	            .thenCompose(vl -> rewardsService.calculateRewards(user)
-	                    .thenApply(v -> {user.addToVisitedLocations(vl);
-	                                        return vl;
-	                                        }));
+	            .thenCompose(vl -> {user.addToVisitedLocations(vl);
+	                                return rewardsService
+	                                           .calculateRewards(user, executor)
+	                                           .thenApply(calReward -> vl);});
+	                    
 	            
 	    
 	    /*CompletableFuture<VisitedLocation> visitedLocationFuture = 
