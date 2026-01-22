@@ -33,9 +33,11 @@ jobs:
 
     
     - name: Build with Maven
-      run: mvn -B package --file TourGuide/pom.xml
+      working-directory: TourGuide
+      run: mvn -B package --file pom.xml
 
     - name: Publish to GitHub Packages Apache Maven
+      working-directory: TourGuide
       run: mvn deploy -s $GITHUB_WORKSPACE/settings.xml
       env:
         GITHUB_TOKEN: ${{ github.token }}
