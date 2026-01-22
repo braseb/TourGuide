@@ -76,7 +76,7 @@
 	</build>
 	<profiles>
       <profile>
-        <id>release</id>
+        <id>releaseGithub</id>
         <distributionManagement>
           <repository>
             <id>github</id>
