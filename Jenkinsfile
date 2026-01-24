@@ -1,12 +1,7 @@
 pipeline {
     agent any
     stages {
-        stage('Clean workspace') {
-            steps {
-                cleanWs() // Supprime les fichiers des builds précédents
-            }
-        }
-                
+                        
         stage ('Install local library') {
             steps {
                 dir('TourGuide') {
@@ -45,11 +40,18 @@ pipeline {
                echo "Build"
                dir('TourGuide') {
                    sh 'mvn -Dmaven.test.skip=true package'
+                   archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
                }
                
            }
             
         }
-    } 
+  
+    }
+     post {
+	    always {
+	        cleanWs()
+	    }
+    }
 }
 
