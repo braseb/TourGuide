@@ -1,11 +1,10 @@
+image: maven:3.9.9-eclipse-temurin-17
+
 stages:
   - install
   - compile
   - test
   - build
-
-variables:
-  MAVEN_CLI_OPTS: "-B -DskipTests"
 
 # Stage 1 : Install local library'
 install_local_libs:
@@ -15,22 +14,14 @@ install_local_libs:
     - mvn install:install-file -Dfile=libs/gpsUtil.jar -DgroupId=gpsUtil -DartifactId=gpsUtil -Dversion=1.0.0 -Dpackaging=jar
     - mvn install:install-file -Dfile=libs/RewardCentral.jar -DgroupId=rewardCentral -DartifactId=rewardCentral -Dversion=1.0.0 -Dpackaging=jar
     - mvn install:install-file -Dfile=libs/TripPricer.jar -DgroupId=tripPricer -DartifactId=tripPricer -Dversion=1.0.0 -Dpackaging=jar
-  #artifacts:
-  #  paths:
-  #    - TourGuide/target/*.jar
-  #  expire_in: 1 hour
-
+  
 # Stage 2 : Compile
 compile:
   stage: compile
   script:
     - cd TourGuide
     - mvn -B -DskipTests clean compile
-  #artifacts:
-  #  paths:
-  #    - TourGuide/target/classes
-  #  expire_in: 1 hour
-
+ 
 # Stage 3 : Launch tests
 test:
   stage: test
