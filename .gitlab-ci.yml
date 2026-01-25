@@ -33,8 +33,6 @@ install_local_libs:
 # Stage 2 : Compile
 compile:
   stage: compile
-  dependencies:
-    - install_local_libs
   script:
     - cd TourGuide
     - mvn -B -DskipTests clean compile
