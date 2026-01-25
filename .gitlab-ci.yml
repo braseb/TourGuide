@@ -6,8 +6,16 @@ stages:
   - test
   - build
 
+#variables:
+#  MAVEN_USER_HOME: "$CI_PROJECT_DIR/.m2"
 variables:
-  MAVEN_USER_HOME: "$CI_PROJECT_DIR/.m2"
+  MAVEN_OPTS: "-Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository"
+
+# Cache Maven
+cache:
+  key: ${CI_COMMIT_REF_SLUG}
+  paths:
+    - .m2/repository/
 
 # Stage 1 : Install local library'
 install_local_libs:
