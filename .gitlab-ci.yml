@@ -25,6 +25,8 @@ install_local_libs:
 # Stage 2 : Compile
 compile:
   stage: compile
+  dependencies:
+    - install_local_libs
   script:
     - cd TourGuide
     - mvn -B -DskipTests clean compile
@@ -36,6 +38,8 @@ compile:
 # Stage 3 : Launch tests
 test:
   stage: test
+  dependencies:
+    - compile
   script:
     - cd TourGuide
     - mvn test
@@ -47,6 +51,8 @@ test:
 # Stage 4 : Build Jar
 build:
   stage: build
+  dependencies:
+    - compile
   script:
     - cd TourGuide
     - mvn -Dmaven.test.skip=true package
