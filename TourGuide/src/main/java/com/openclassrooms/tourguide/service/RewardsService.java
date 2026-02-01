@@ -2,9 +2,11 @@ package com.openclassrooms.tourguide.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
@@ -48,13 +50,20 @@ public class RewardsService {
                 		
                 		List<UserReward> UserRewardToAdd = new ArrayList<UserReward>();
                 		
+                		// Create a Set of attractions already with reward
+                        Set<String> alreadyRewarded = user.getUserRewards().stream()
+                            .map(r -> r.attraction.attractionName)
+                            .collect(Collectors.toSet());
+                		
                 		for(VisitedLocation visitedLocation : userLocations) {
                 			
                 		    for(Attraction attraction : attractions) {
-                				if(user.getUserRewards().stream().filter(r -> r.attraction.attractionName.equals(attraction.attractionName)).count() == 0) {
-                					if(nearAttraction(visitedLocation, attraction)) {
+                				//if(user.getUserRewards().stream().filter(r -> r.attraction.attractionName.equals(attraction.attractionName)).count() == 0) {
+                		        if(!alreadyRewarded.contains(attraction.attractionName)) {	
+                		            if(nearAttraction(visitedLocation, attraction)) {
                 						UserRewardToAdd.add(new UserReward(visitedLocation, attraction, getRewardPoints(attraction, user)));
                 					    //user.addUserReward(new UserReward(visitedLocation, attraction, getRewardPoints(attraction, user)));
+                						alreadyRewarded.add(attraction.attractionName);
                 					}
                 				}
                 				

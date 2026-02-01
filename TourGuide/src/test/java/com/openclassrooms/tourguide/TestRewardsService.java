@@ -7,6 +7,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -51,14 +53,14 @@ public class TestRewardsService {
 	//@Disabled // Needs fixed - can throw ConcurrentModificationException
 	@Test
 	public void nearAllAttractions() {
-		GpsUtil gpsUtil = new GpsUtil();
+		
+	    GpsUtil gpsUtil = new GpsUtil();
 		RewardsService rewardsService = new RewardsService(gpsUtil, new RewardCentral());
 		rewardsService.setProximityBuffer(Integer.MAX_VALUE);
 
 		InternalTestHelper.setInternalUserNumber(1);
 		TourGuideService tourGuideService = new TourGuideService(gpsUtil, rewardsService);
 		
-		//tourGuideService.tracker.stopTracking();
 		rewardsService.calculateRewards(tourGuideService.getAllUsers().get(0)).join();
 		List<UserReward> userRewards = tourGuideService.getUserRewards(tourGuideService.getAllUsers().get(0));
 		tourGuideService.tracker.stopTracking();
