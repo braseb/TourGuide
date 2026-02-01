@@ -20,6 +20,8 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -55,8 +57,13 @@ public class TourGuideService {
 			logger.info("TestMode enabled");
 			logger.debug("Initializing users");
 			initializeInternalUsers();
+			//append rewards in users for have rewards in the endpoint /getRewards
+	        //rewardsService.setProximityBuffer(2000);
+	        //generateRewardsUsers(getAllUsers());
+			
 			logger.debug("Finished initializing users");
 		}
+		
 		tracker = new Tracker(this);
 		addShutDownHook();
 	}
@@ -160,7 +167,7 @@ public class TourGuideService {
                 
             }
         }
-
+        
         return nearbyAttractionsInfo;
 	}
 		
@@ -201,6 +208,21 @@ public class TourGuideService {
 					new Location(generateRandomLatitude(), generateRandomLongitude()), getRandomTime()));
 		});
 	}
+		
+	private void generateRewardsUsers(List<User> users) {
+	    ExecutorService executor = Executors.newFixedThreadPool(200);
+        List<CompletableFuture<Void>> futureCalculRewards = users.stream()
+                                                   .map(u -> {
+                                                        return rewardsService.calculateRewards(u, executor);
+                                                            })
+                                                   .collect(Collectors.toList());
+                
+        CompletableFuture<Void> allCommpleteFuture = CompletableFuture.allOf(futureCalculRewards.toArray(new CompletableFuture[0]));
+        allCommpleteFuture.join();
+        executor.shutdown();
+	}
+		
+	
 
 	private double generateRandomLongitude() {
 		double leftLimit = -180;
