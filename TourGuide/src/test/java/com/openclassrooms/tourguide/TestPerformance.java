@@ -98,13 +98,15 @@ public class TestPerformance {
 		// minutes
 		InternalTestHelper.setInternalUserNumber(10000);
 		StopWatch stopWatch = new StopWatch();
-		stopWatch.start();
+		
 		TourGuideService tourGuideService = new TourGuideService(gpsUtil, rewardsService);
 
 		Attraction attraction = gpsUtil.getAttractions().get(0);
 		List<User> allUsers = new ArrayList<>();
 		allUsers = tourGuideService.getAllUsers();
 		allUsers.forEach(u -> u.addToVisitedLocations(new VisitedLocation(u.getUserId(), attraction, new Date())));
+		
+		stopWatch.start();
 		
 		//int cores = Runtime.getRuntime().availableProcessors();
 		//System.out.println(cores);
