@@ -1,6 +1,8 @@
 package com.openclassrooms.tourguide.tracker;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -11,6 +13,8 @@ import org.slf4j.LoggerFactory;
 
 import com.openclassrooms.tourguide.service.TourGuideService;
 import com.openclassrooms.tourguide.user.User;
+
+import gpsUtil.location.VisitedLocation;
 
 public class Tracker extends Thread {
 	private Logger logger = LoggerFactory.getLogger(Tracker.class);
@@ -31,6 +35,7 @@ public class Tracker extends Thread {
 	public void stopTracking() {
 		stop = true;
 		executorService.shutdownNow();
+		
 	}
 
 	@Override
@@ -45,7 +50,16 @@ public class Tracker extends Thread {
 			List<User> users = tourGuideService.getAllUsers();
 			logger.debug("Begin Tracker. Tracking " + users.size() + " users.");
 			stopWatch.start();
-			users.forEach(u -> tourGuideService.trackUserLocation(u));
+			
+			//users.forEach(u -> tourGuideService.trackUserLocation(u));
+			List<CompletableFuture<VisitedLocation>> listVisitedLocationFuture = new ArrayList<CompletableFuture<VisitedLocation>>();
+	        for (User user : users) {
+	            listVisitedLocationFuture.add(tourGuideService.trackUserLocation(user, executorService));
+	            
+	        }
+	        CompletableFuture<Void> allCommpleteFuture =  CompletableFuture.allOf(listVisitedLocationFuture.toArray(new CompletableFuture[0]));
+	        allCommpleteFuture.join();
+	        
 			stopWatch.stop();
 			logger.debug("Tracker Time Elapsed: " + TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()) + " seconds.");
 			stopWatch.reset();
