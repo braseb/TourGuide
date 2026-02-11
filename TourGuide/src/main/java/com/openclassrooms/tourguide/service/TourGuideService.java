@@ -112,21 +112,7 @@ public class TourGuideService {
 	                                return rewardsService
 	                                           .calculateRewards(user, executor)
 	                                           .thenApply(calReward -> vl);});
-	                    
-	            
-	    
-	    /*CompletableFuture<VisitedLocation> visitedLocationFuture = 
-	            CompletableFuture.supplyAsync(() -> gpsUtil.getUserLocation(user.getUserId()))
-	            .thenCompose(vl -> rewardsService.calculateRewards(user)
-	            .thenApply(v -> {user.addToVisitedLocations(vl);
-                                    //rewardsService.calculateRewards(user).join();
-                                    return vl;
-                                    }));*/
-	    
-        
-	    //VisitedLocation visitedLocation = gpsUtil.getUserLocation(user.getUserId());
-		//user.addToVisitedLocations(visitedLocation);
-		//rewardsService.calculateRewards(user);
+	        
 		return visitedLocationFuture;
 	}
 	

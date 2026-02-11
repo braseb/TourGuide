@@ -51,7 +51,6 @@ public class Tracker extends Thread {
 			logger.debug("Begin Tracker. Tracking " + users.size() + " users.");
 			stopWatch.start();
 			
-			//users.forEach(u -> tourGuideService.trackUserLocation(u));
 			List<CompletableFuture<VisitedLocation>> listVisitedLocationFuture = new ArrayList<CompletableFuture<VisitedLocation>>();
 	        for (User user : users) {
 	            listVisitedLocationFuture.add(tourGuideService.trackUserLocation(user, executorService));
